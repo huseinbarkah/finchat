@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String
+  passwordHash String       @default("")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  memberships  Membership[]
+}
+
+model Organization {
+  id             String          @id @default(cuid())
+  name           String
+  slug           String          @unique
+  categories     String          @default("[]") // JSON array stored as string (SQLite compat)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  memberships    Membership[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  allowedSenders AllowedSender[]
+  aiRules        AIRule[]
+}
+
+model Membership {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           String       @default("MEMBER") // OWNER, ADMIN, MEMBER
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+}
+
+model Transaction {
+  id                   String   @id @default(cuid())
+  organizationId       String
+  type                 String   // INCOME or EXPENSE
+  amount               Int      // Stored in Rupiah (integer, no decimals)
+  category             String
+  description          String
+  rawChatLog           String?
+  whatsappSenderNumber String?
+  whatsappSenderName   String?
+  whatsappMessageId    String?  @unique
+  status               String   @default("SUCCESS") // SUCCESS, PENDING, FAILED
+  createdAt            DateTime @default(now())
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model Budget {
+  id             String       @id @default(cuid())
+  organizationId String
+  category       String
+  monthlyLimit   Int
+  monthYear      String       // "2026-05"
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, category, monthYear])
+}
+
+model AllowedSender {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  phoneNumber    String
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, phoneNumber])
+}
+
+model AIRule {
+  id             String       @id @default(cuid())
+  organizationId String
+  keyword        String
+  category       String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, keyword])
+}

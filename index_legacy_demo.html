@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinChat.AI - Dashboard Keuangan Conversational Terpadu</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        title: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            950: '#050811',
+                            900: '#090e1a',
+                            850: '#0f172a',
+                            800: '#1e293b',
+                            750: '#334155',
+                            700: '#475569',
+                        },
+                        whatsapp: {
+                            light: '#34d399',
+                            DEFAULT: '#10b981',
+                            dark: '#059669',
+                        }
+                    },
+                    boxShadow: {
+                        'glow-emerald': '0 0 15px -3px rgba(16, 185, 129, 0.4)',
+                        'glow-blue': '0 0 15px -3px rgba(59, 130, 246, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js for statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090e1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+        /* Custom Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-navy-950 text-slate-300 font-sans h-full flex overflow-hidden">
+
+    <!-- TOAST NOTIFICATION SYSTEM -->
+    <div id="toast-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- MOBILE SIDEBAR DRAWER OVERLAY -->
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <!-- MAIN SIDEBAR NAVIGATION (LEFT SIDEBAR) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-navy-900 border-r border-navy-850/70 flex flex-col justify-between z-50 transform -translate-x-full md:translate-x-0 md:static md:h-full transition-transform duration-300 ease-in-out">
+        <div>
+            <!-- Header Brand Logo -->
+            <div class="h-20 px-6 border-b border-navy-850 flex items-center justify-between">
+                <a href="#" class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-whatsapp to-emerald-400 flex items-center justify-center text-white shadow-md shadow-whatsapp/15">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                    </div>
+                    <span class="font-title font-extrabold text-lg text-white tracking-tight">FinChat<span class="text-whatsapp">.AI</span></span>
+                </a>
+                <!-- Close Button for Mobile Drawer View -->
+                <button id="close-sidebar-btn" class="md:hidden text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Workspace Switcher Section -->
+            <div class="px-4 py-4 border-b border-navy-850/60">
+                <label class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1.5 px-2">Workspace</label>
+                <div class="relative">
+                    <select id="workspace-select" class="w-full bg-navy-950 border border-navy-800 rounded-xl px-3 py-2.5 text-xs font-semibold text-white appearance-none focus:outline-none focus:border-whatsapp focus:ring-1 focus:ring-whatsapp cursor-pointer">
+                        <option value="bem-unpad">🎒 BEM Kema Unpad</option>
+                        <option value="personal">👨💻 Keuangan Pribadi</option>
+                        <option value="umkm">🛍️ Kedai Kopi Kita (UMKM)</option>
+                    </select>
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[10px]">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links/Tabs -->
+            <nav class="px-3 py-4 space-y-1">
+                <button data-target="tab-ikhtisar" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-navy-850 text-white border border-navy-800/40">
+                    <i class="fa-solid fa-chart-line text-whatsapp w-5 text-center"></i> Ikhtisar (Overview)
+                </button>
+                <button data-target="tab-transaksi" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-navy-850/50 transition-all">
+                    <i class="fa-solid fa-receipt w-5 text-center text-slate-500"></i> Catatan Transaksi
+                </button>
+                <button data-target="tab-anggaran" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-navy-850/50 transition-all">
+                    <i class="fa-solid fa-wallet w-5 text-center text-slate-500"></i> Anggaran &amp; Aturan AI
+                </button>
+                <button data-target="tab-sinkronisasi" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-navy-850/50 transition-all">
+                    <i class="fa-solid fa-arrows-spin w-5 text-center text-slate-500"></i> Sinkronisasi WA
+                </button>
+                <button data-target="tab-laporan" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-navy-850/50 transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-slate-500"></i> Generator Laporan
+                </button>
+            </nav>
+        </div>
+
+        <!-- User Profile Card (Bottom of Sidebar) -->
+        <div class="p-4 border-t border-navy-850/80 flex items-center justify-between">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    AN
+                </div>
+                <div class="overflow-hidden">
+                    <p id="user-display-name" class="text-xs font-bold text-white truncate">Admin Nurhaliza</p>
+                    <p id="user-display-email" class="text-[10px] text-slate-500 truncate">bendahara@bem.org</p>
+                </div>
+            </div>
+            <button onclick="handleLogout()" class="text-slate-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-navy-850/50 transition-colors" title="Log Out">
+                <i class="fa-solid fa-right-from-bracket text-sm"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT WINDOW CONTAINER -->
+    <main class="flex-grow flex flex-col min-w-0 h-full overflow-hidden relative">
+        
+        <!-- HEADER TOP BAR -->
+        <header class="h-20 border-b border-navy-850/80 bg-navy-900/40 backdrop-blur-md px-6 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-4">
+                <!-- Hamburger Menu Toggle Button (Mobile Viewports Only) -->
+                <button id="hamburger-btn" class="md:hidden text-slate-300 hover:text-white focus:outline-none transition-colors">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <div>
+                    <h1 id="page-title" class="font-title font-extrabold text-xl text-white tracking-tight">Ikhtisar Dashboard</h1>
+                    <p id="page-subtitle" class="text-xs text-slate-500">Potret cepat arus kas & efisiensi kecerdasan buatan Anda bulan ini.</p>
+                </div>
+            </div>
+
+            <!-- Header Performance Pill and Quick Alerts -->
+            <div class="flex items-center gap-4">
+                <!-- AI Efficiency indicator Pill -->
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[11px] font-semibold text-emerald-400">Efisiensi AI: 96.8%</span>
+                </div>
+                <!-- Alert/Notifications Drawer trigger button -->
+                <button id="notif-btn" onclick="showNotificationDropdown()" class="relative w-10 h-10 rounded-xl bg-navy-900 border border-navy-800 hover:border-navy-750 flex items-center justify-center text-slate-300 hover:text-white transition-all">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notif-badge" class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- APP PANELS VIEWPORT (SCROLLABLE CONTENT AREA) -->
+        <div class="flex-grow overflow-y-auto p-6" id="view-container">
+            
+            <!-- ========================================== -->
+            <!-- TAB 1: IKHTISAR (DASHBOARD/OVERVIEW VIEW)  -->
+            <!-- ========================================== -->
+            <section id="tab-ikhtisar" class="tab-content space-y-6">
+                <!-- KPI Card Grid Layout -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Metric Box 1: Saldo -->
+                    <div class="bg-navy-900 border border-navy-850 p-5 rounded-2xl relative overflow-hidden group hover:border-navy-800 transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500">TOTAL SALDO AKTIF</span>
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm shadow-inner"><i class="fa-solid fa-wallet"></i></div>
+                        </div>
+                        <h3 class="font-title font-bold text-2xl text-white tracking-tight" id="kpi-saldo">Rp 2.000.000</h3>
+                        <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5" id="kpi-saldo-sub"><i class="fa-solid fa-circle-check text-emerald-400"></i> Arus kas sehat &amp; aman.</p>
+                    </div>
+                    <!-- Metric Box 2: Pemasukan -->
+                    <div class="bg-navy-900 border border-navy-850 p-5 rounded-2xl relative overflow-hidden group hover:border-navy-800 transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500">PEMASUKAN BULAN INI</span>
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm"><i class="fa-solid fa-square-arrow-up-right"></i></div>
+                        </div>
+                        <h3 class="font-title font-bold text-2xl text-white tracking-tight" id="kpi-masuk">Rp 2.500.000</h3>
+                        <p class="text-[11px] text-emerald-400 mt-2 flex items-center gap-1" id="kpi-masuk-sub"><i class="fa-solid fa-arrow-trend-up"></i> +12% vs bulan lalu</p>
+                    </div>
+                    <!-- Metric Box 3: Pengeluaran -->
+                    <div class="bg-navy-900 border border-navy-850 p-5 rounded-2xl relative overflow-hidden group hover:border-navy-800 transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500">PENGELUARAN BULAN INI</span>
+                            <div class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center text-sm"><i class="fa-solid fa-square-arrow-down-left"></i></div>
+                        </div>
+                        <h3 class="font-title font-bold text-2xl text-white tracking-tight" id="kpi-keluar">Rp 500.000</h3>
+                        <p class="text-[11px] text-red-400 mt-2 flex items-center gap-1" id="kpi-keluar-sub"><i class="fa-solid fa-circle-exclamation"></i> 20% dari batas pagu</p>
+                    </div>
+                    <!-- Metric Box 4: Efisiensi AI -->
+                    <div class="bg-navy-900 border border-navy-850 p-5 rounded-2xl relative overflow-hidden group hover:border-navy-800 transition-all">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold text-slate-500">EFISIENSI AI PARSING</span>
+                            <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        </div>
+                        <h3 class="font-title font-bold text-2xl text-white tracking-tight">96.8%</h3>
+                        <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1"><i class="fa-solid fa-circle-nodes text-purple-400"></i> Parsing instan tanpa lag</p>
+                    </div>
+                </div>
+
+                <!-- Graphs & Activity Feed Layout Split -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Live Cash Flow Chart Visualization -->
+                    <div class="lg:col-span-8 bg-navy-900 border border-navy-850 p-5 rounded-2xl">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-title font-bold text-base text-white">Visualisasi Perbandingan Arus Kas</h3>
+                            <span class="text-xs text-slate-500" id="chart-month-indicator">Periode Mei 2026</span>
+                        </div>
+                        <div class="h-[300px] w-full relative" id="chart-container">
+                            <canvas id="cashflowChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Webhook Activity Streaming Logs -->
+                    <div class="lg:col-span-4 bg-navy-900 border border-navy-850 p-5 rounded-2xl flex flex-col justify-between min-h-[385px]">
+                        <div>
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-navy-850">
+                                <h3 class="font-title font-bold text-base text-white">Log Aktivitas WA</h3>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Real-time</span>
+                            </div>
+                            <!-- Logs Scrolling Core Wrapper -->
+                            <div class="space-y-3 max-h-[280px] overflow-y-auto pr-1" id="overview-recent-logs">
+                                <!-- Loaded dynamically via JS state updates -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================= -->
+            <!-- TAB 2: CATATAN TRANSAKSI (TRANSACTIONS LEDGER)-->
+            <!-- ============================================= -->
+            <section id="tab-transaksi" class="tab-content hidden space-y-6">
+                <!-- Advanced Query Filters & Manual Create triggers -->
+                <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                    <!-- Filters Grid Alignment -->
+                    <div class="flex flex-wrap gap-2.5 items-center flex-grow max-w-3xl">
+                        <div class="relative flex-grow sm:flex-grow-0 sm:w-60">
+                            <input id="search-transactions" type="text" placeholder="Cari deskripsi / pengirim..." class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-900 border border-navy-800 text-white focus:outline-none focus:border-whatsapp">
+                            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        </div>
+                        <select id="filter-type" class="bg-navy-900 text-xs border border-navy-800 rounded-xl px-3 py-2.5 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                            <option value="all">Semua Jenis</option>
+                            <option value="income">Pemasukan (+)</option>
+                            <option value="expense">Pengeluaran (-)</option>
+                        </select>
+                        <select id="filter-category" class="bg-navy-900 text-xs border border-navy-800 rounded-xl px-3 py-2.5 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                            <option value="all">Semua Kategori</option>
+                            <!-- Rest of items injected during setup based on rules -->
+                        </select>
+                    </div>
+
+                    <!-- Direct CRUD Insert Dialog Trigger -->
+                    <button onclick="openManualTransactionModal()" class="px-5 py-2.5 rounded-xl bg-whatsapp hover:bg-whatsapp-dark text-navy-950 font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-glow-emerald">
+                        <i class="fa-solid fa-plus"></i> Transaksi Manual
+                    </button>
+                </div>
+
+                <!-- Ledger Table Data Grid -->
+                <div class="bg-navy-900 border border-navy-850 rounded-2xl overflow-hidden shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-navy-850 bg-navy-950/40 text-slate-400 font-semibold text-xs uppercase tracking-wider">
+                                    <th class="py-4 px-5">Tanggal</th>
+                                    <th class="py-4 px-5">Pengirim (WA)</th>
+                                    <th class="py-4 px-5">Chat Mentah</th>
+                                    <th class="py-4 px-5">Hasil AI (Kategori)</th>
+                                    <th class="py-4 px-5 text-right">Jumlah (IDR)</th>
+                                    <th class="py-4 px-5 text-center">Status</th>
+                                    <th class="py-4 px-5 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledger-table-body" class="divide-y divide-navy-850/60">
+                                <!-- Re-rendered automatically via state handlers -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- TAB 3: MANAJEMEN ANGGARAN & ATURAN AI CUSTOMIZ -->
+            <!-- ============================================== -->
+            <section id="tab-anggaran" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Left Column Widget: Budget Tracker Progress Panels -->
+                    <div class="lg:col-span-6 bg-navy-900 border border-navy-850 p-6 rounded-2xl space-y-6">
+                        <div>
+                            <h3 class="font-title font-bold text-base text-white mb-1">Pelacak Anggaran Terkini</h3>
+                            <p class="text-xs text-slate-500">Memonitor sisa pagu anggaran bulanan yang berhasil divalidasi oleh bot WhatsApp.</p>
+                        </div>
+                        
+                        <!-- List of categories budget tracker bars -->
+                        <div class="space-y-4" id="budget-progress-container">
+                            <!-- Rendered on reactive state loop changes -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column Widget: Training Local AI / Parser Custom Rules -->
+                    <div class="lg:col-span-6 bg-navy-900 border border-navy-850 p-6 rounded-2xl space-y-6">
+                        <div>
+                            <h3 class="font-title font-bold text-base text-white mb-1">Aturan Pengenalan AI</h3>
+                            <p class="text-xs text-slate-500">Gunakan aturan ini untuk memetakan kosakata lokal / slang khusus ke kategori pembukuan yang sah.</p>
+                        </div>
+
+                        <!-- Rule Registering Form -->
+                        <form id="add-rule-form" class="space-y-4 pt-2">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Kosa Kata (Keyword)</label>
+                                    <input id="rule-keyword" required type="text" placeholder="Contoh: 'goceng', 'snack'" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-white focus:outline-none focus:border-whatsapp">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Kategori Klasifikasi</label>
+                                    <select id="rule-category" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                                        <!-- Category Options loaded dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-navy-800 hover:bg-navy-750 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-plus text-whatsapp"></i> Daftarkan Aturan AI Baru
+                            </button>
+                        </form>
+
+                        <!-- Existing Active Mapping Whitelist -->
+                        <div class="border-t border-navy-850/80 pt-4">
+                            <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Daftar Aturan Aktif</h4>
+                            <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1" id="rules-list-container">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- TAB 4: INTEGRASI WHATSAPP GATEWAY & WEBHOOKS   -->
+            <!-- ============================================== -->
+            <section id="tab-sinkronisasi" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Server Endpoint Configurations -->
+                    <div class="lg:col-span-7 bg-navy-900 border border-navy-850 p-6 rounded-2xl space-y-6">
+                        <div class="flex items-center justify-between border-b border-navy-850/60 pb-4">
+                            <div>
+                                <h3 class="font-title font-bold text-base text-white mb-1">Status Webhook Meta Cloud</h3>
+                                <p class="text-xs text-slate-500">Konfigurasi endpoint webhook untuk didaftarkan ke Meta Portal Developer.</p>
+                            </div>
+                            <!-- Connection toggle status pill -->
+                            <button id="connection-status-toggle" onclick="toggleServerConnection()" class="px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold flex items-center gap-1.5 transition-all">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Server Aktif (Online)
+                            </button>
+                        </div>
+
+                        <!-- Webhook Payload URI Box -->
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-400">Webhook API URL (HTTPS Endpoint)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="webhook-url-input" readonly value="https://api.finchat.ai/v1/webhook/bem-unpad" class="flex-grow text-xs font-mono px-3 py-3 rounded-xl bg-navy-950 border border-navy-800 text-slate-400 focus:outline-none">
+                                <button onclick="copyWebhookEndpoint()" class="px-4 rounded-xl bg-navy-850 hover:bg-navy-800 border border-navy-800 text-xs font-semibold text-white transition-all flex items-center gap-1.5"><i class="fa-solid fa-copy"></i> Salin</button>
+                            </div>
+                        </div>
+
+                        <!-- Webhook Server Statistics API Metrics -->
+                        <div class="grid grid-cols-3 gap-3 pt-2">
+                            <div class="p-3.5 bg-navy-950 rounded-xl border border-navy-850 text-center">
+                                <p class="text-[10px] text-slate-500 uppercase font-semibold">Latensi Gateway</p>
+                                <p id="gateway-latency-txt" class="text-base font-bold text-white mt-1">45ms</p>
+                            </div>
+                            <div class="p-3.5 bg-navy-950 rounded-xl border border-navy-850 text-center">
+                                <p class="text-[10px] text-slate-500 uppercase font-semibold">Tingkat Kegagalan</p>
+                                <p class="text-base font-bold text-emerald-400 mt-1">0.12%</p>
+                            </div>
+                            <div class="p-3.5 bg-navy-950 rounded-xl border border-navy-850 text-center">
+                                <p class="text-[10px] text-slate-500 uppercase font-semibold">Total Request Webhook</p>
+                                <p class="text-base font-bold text-white mt-1" id="sync-total-webhooks">124</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allowed Senders Whitelist Ledger (Security) -->
+                    <div class="lg:col-span-5 bg-navy-900 border border-navy-850 p-6 rounded-2xl space-y-5">
+                        <div>
+                            <h3 class="font-title font-bold text-base text-white mb-1">Daftar Pengirim Terverifikasi</h3>
+                            <p class="text-xs text-slate-500">Hanya nomor WA yang terdaftar di bawah ini yang diizinkan menginput transaksi ke workspace ini.</p>
+                        </div>
+
+                        <!-- Allowed Whitelisted Users -->
+                        <div class="space-y-2.5" id="allowed-senders-container">
+                            <!-- Injected from State -->
+                        </div>
+
+                        <!-- Add Sender Whitelist Inline Drawer -->
+                        <form id="add-sender-form" class="flex gap-2 border-t border-navy-850 pt-4">
+                            <input id="sender-name" required type="text" placeholder="Nama Admin" class="w-1/2 text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-white focus:outline-none">
+                            <input id="sender-phone" required type="text" placeholder="6281.. (No WA)" class="w-1/2 text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-white focus:outline-none font-mono">
+                            <button type="submit" class="px-4 rounded-xl bg-whatsapp hover:bg-whatsapp-dark text-navy-950 font-bold text-xs shrink-0 transition-colors"><i class="fa-solid fa-plus"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- TAB 5: GENERATOR LAPORAN & LIVE PREVIEW WINDOW -->
+            <!-- ============================================== -->
+            <section id="tab-laporan" class="tab-content hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    <!-- Configuration parameters Panel (Left Column) -->
+                    <div class="lg:col-span-4 bg-navy-900 border border-navy-850 p-6 rounded-2xl flex flex-col justify-between">
+                        <div class="space-y-5">
+                            <div>
+                                <h3 class="font-title font-bold text-base text-white mb-1">Saring Dokumen Ekspor</h3>
+                                <p class="text-xs text-slate-500">Atur parameter dan klasifikasi laporan sebelum mengunduh berkas fisik.</p>
+                            </div>
+
+                            <!-- Date Range dropdown selection -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-semibold text-slate-400">Pilih Periode Waktu</label>
+                                <select id="report-period" onchange="refreshAllUIRenderers()" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                                    <option value="this-month">Bulan Berjalan (Mei 2026)</option>
+                                    <option value="last-month">Bulan Kemarin (April 2026)</option>
+                                    <option value="all-time">Seluruh Riwayat Transaksi</option>
+                                </select>
+                            </div>
+
+                            <!-- Grouping / Sorting layout metrics -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-semibold text-slate-400">Penyusunan Data</label>
+                                <select class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                                    <option value="chronological">Urutan Kronologis (Tanggal Terbit)</option>
+                                    <option value="by-category">Pengelompokkan per Kategori Transaksi</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Action Export Download triggers -->
+                        <div class="space-y-3 pt-6 border-t border-navy-850/60 mt-6">
+                            <button onclick="simulateCSVExport()" class="w-full py-3 rounded-xl bg-navy-800 hover:bg-navy-750 text-white border border-navy-800/80 font-bold text-xs transition-colors flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-file-csv text-emerald-400 text-sm"></i> Unduh Berkas CSV (Microsoft Excel)
+                            </button>
+                            <button onclick="simulatePDFExport()" class="w-full py-3 rounded-xl bg-whatsapp hover:bg-whatsapp-dark text-navy-950 font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-glow-emerald">
+                                <i class="fa-solid fa-file-pdf text-sm"></i> Unduh Berkas Laporan PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Dynamic PDF Render Preview Screen (Right Column) -->
+                    <div class="lg:col-span-8 bg-navy-900 border border-navy-850 p-6 rounded-2xl flex flex-col justify-between">
+                        <div class="flex justify-between items-center border-b border-navy-850/60 pb-3 mb-4">
+                            <h3 class="font-title font-bold text-sm text-white flex items-center gap-2"><i class="fa-solid fa-eye text-whatsapp"></i> Pratinjau Dokumen PDF Real-time</h3>
+                            <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">laporan_keuangan_preview.pdf</span>
+                        </div>
+
+                        <!-- Dynamic Document Sheet Frame (Stylized White Sheet) -->
+                        <div class="flex-grow bg-white text-slate-800 p-8 rounded-xl shadow-lg font-serif min-h-[400px] flex flex-col justify-between border border-slate-300">
+                            <div id="pdf-export-content">
+                                <!-- Report Head layout -->
+                                <div class="text-center border-b-2 border-slate-800 pb-4 mb-5">
+                                    <h4 id="pdf-header-title" class="font-bold text-lg uppercase tracking-tight text-slate-900">LAPORAN ARUS KAS MASUK &amp; KELUAR</h4>
+                                    <p id="pdf-header-sub" class="text-xs uppercase font-sans font-semibold tracking-wider text-slate-600 mt-1">BEM KEMA UNIVERSITAS PADJADJARAN</p>
+                                    <p class="text-[10px] italic font-sans text-slate-500 mt-0.5">Sistem Laporan Otomatis via FinChat.AI Engine</p>
+                                </div>
+
+                                <!-- Metadata info grid -->
+                                <div class="grid grid-cols-2 text-[10px] font-sans text-slate-600 mb-6 gap-2">
+                                    <div>
+                                        <p><strong>Periode Laporan:</strong> <span id="pdf-meta-period">Mei 2026</span></p>
+                                        <p><strong>Tanggal Cetak:</strong> 19 Mei 2026</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p><strong>Klasifikasi Laporan:</strong> Laporan Publik</p>
+                                        <p><strong>Mata Uang:</strong> IDR (Rupiah)</p>
+                                    </div>
+                                </div>
+
+                                <!-- Live Injected Table ledger items -->
+                                <div class="font-sans text-[10px]">
+                                    <div class="grid grid-cols-12 border-b border-slate-800 pb-1.5 font-bold mb-1.5">
+                                        <div class="col-span-3">Tanggal</div>
+                                        <div class="col-span-5">Keterangan Transaksi</div>
+                                        <div class="col-span-2 text-right">Debit</div>
+                                        <div class="col-span-2 text-right">Kredit</div>
+                                    </div>
+                                    <div id="pdf-preview-rows" class="space-y-1.5">
+                                        <!-- Injected dynamically from reactive State -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PDF Footer -->
+                            <div class="flex justify-between items-end border-t border-slate-300 pt-4 font-sans text-[9px] text-slate-400 mt-8">
+                                <div>FinChat.AI • Sistem Pelaporan Berbasis Obrolan WhatsApp Otomatis</div>
+                                <div>Halaman 1 dari 1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- FLOATING WHATSAPP CHAT BOT SIMULATOR LAYER (COLLAPSIBLE WIDGET) -->
+    <div id="wa-simulator-panel" class="fixed bottom-6 right-6 z-40 flex flex-col justify-end items-end">
+        
+        <!-- Toggle Float Action Button (FAB) -->
+        <button id="wa-simulator-fab" onclick="toggleWhatsAppSimulator()" class="w-14 h-14 rounded-full bg-whatsapp hover:bg-whatsapp-dark text-navy-950 flex items-center justify-center shadow-2xl hover:shadow-whatsapp/30 cursor-pointer transition-all border border-emerald-400/20">
+            <i class="fa-brands fa-whatsapp text-2xl"></i>
+        </button>
+
+        <!-- Main Conversational Interface Box (Initially Hidden) -->
+        <div id="wa-simulator-box" class="hidden flex flex-col bg-[#0b141a] w-[350px] h-[500px] rounded-2xl overflow-hidden border border-emerald-800/30 shadow-2xl mt-4 animate-fade-in">
+            <!-- WA Chat Header -->
+            <div class="bg-[#075e54] px-4 py-3 flex items-center justify-between text-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-slate-700/80 flex items-center justify-center text-white text-base relative">
+                        <i class="fa-solid fa-robot"></i>
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#075e54]"></span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-xs">FinChat.AI Assistant</p>
+                        <p class="text-[10px] text-emerald-200">Asisten Pembukuan Otomatis</p>
+                    </div>
+                </div>
+                <!-- Chatbox action options -->
+                <div class="flex items-center gap-3 text-slate-200">
+                    <button onclick="toggleWhatsAppSimulator()" class="hover:text-white transition-colors"><i class="fa-solid fa-minus text-sm"></i></button>
+                </div>
+            </div>
+
+            <!-- Scrollable Messages feed area -->
+            <div id="wa-chat-messages" class="flex-grow overflow-y-auto p-4 space-y-3 bg-repeat bg-opacity-20 flex flex-col justify-end" style="background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-size: 50%;">
+                <!-- AI Welcoming System bubble -->
+                <div class="self-start max-w-[85%] bg-[#1f2c34] text-slate-200 text-xs p-3 rounded-r-lg rounded-bl-lg shadow-md border-l-4 border-whatsapp animate-fade-in">
+                    <p class="font-semibold text-whatsapp mb-1">FinChat.AI Bot 👋</p>
+                    Halo! Silakan ketik transaksi harian seperti mengobrol biasa!
+                    <br><br>
+                    <em>Contoh format percakapan:</em><br>
+                    • "masuk donasi iuran ukm 2.5 juta"<br>
+                    • "bayar fotokopi modul BEM 500rb"<br>
+                    • "beli kopi sachet ceban buat konsumsi"
+                </div>
+            </div>
+
+            <!-- Form input box footer -->
+            <form id="wa-chat-form" class="bg-[#1f2c34] px-3 py-2 flex items-center gap-2 shrink-0">
+                <input id="wa-chat-input" type="text" autocomplete="off" placeholder="Tulis pengeluaran/pemasukan..." class="flex-grow px-3 py-2 bg-[#2a3942] rounded-full text-white text-xs focus:outline-none border border-slate-700/30">
+                <button type="submit" class="w-8 h-8 rounded-full bg-whatsapp text-navy-950 flex items-center justify-center hover:bg-whatsapp-dark shadow-md shrink-0 transition-colors">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP DIALOG: INSERT MANUAL TRANSACTION -->
+    <div id="manual-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-navy-900 border border-navy-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <!-- Modal Head -->
+            <div class="px-5 py-4 border-b border-navy-850 flex items-center justify-between text-white">
+                <h3 class="font-title font-bold text-sm"><i class="fa-solid fa-keyboard text-whatsapp mr-1.5"></i> Tambah Catatan Manual</h3>
+                <button onclick="closeManualTransactionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Modal Form -->
+            <form id="manual-transaction-form" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Keterangan Transaksi / Item</label>
+                    <input id="manual-desc" required type="text" placeholder="Contoh: Pembelian spidol sekretariat BEM" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-white focus:outline-none focus:border-whatsapp">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jenis Aliran Dana</label>
+                        <select id="manual-type" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                            <option value="expense">Pengeluaran (-)</option>
+                            <option value="income">Pemasukan (+)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Jumlah Nominal (IDR)</label>
+                        <input id="manual-amount" required type="number" placeholder="50000" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-white focus:outline-none focus:border-whatsapp">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1.5">Kategori Klasifikasi</label>
+                    <select id="manual-cat" class="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                        <!-- Loaded from JavaScript Category array -->
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeManualTransactionModal()" class="w-1/2 py-2.5 rounded-xl bg-navy-850 hover:bg-navy-800 text-white font-bold text-xs transition-all">Batalkan</button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-whatsapp hover:bg-whatsapp-dark text-navy-950 font-bold text-xs transition-all shadow-glow-emerald">Simpan Transaksi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ======================================================= -->
+    <!-- CORE JAVASCRIPT STATE ENGINE & NLP CHAT PARSER SIMULATOR-->
+    <!-- ======================================================= -->
+    <script>
+        // ==========================================
+        // 1. DATA STATE MANAGEMENT (DATABASE MOCK)
+        // ==========================================
+        
+        // Active Workspaces definitions
+        const workspaces = {
+            "bem-unpad": {
+                name: "BEM Kema Unpad",
+                email: "bendahara@bem.org",
+                categories: ["Donasi", "Kas Kelas", "Alat Kantor", "Transportasi", "Konsumsi", "Lain-lain"],
+                transactions: [
+                    { id: 1, date: "19 Mei 2026", sender: "Budi (WA Admin)", rawMessage: "masuk donasi iuran ukm 2.5 juta", category: "Donasi", type: "income", amount: 2500000, status: "Sukses" },
+                    { id: 2, date: "19 Mei 2026", sender: "Budi (WA Admin)", rawMessage: "bayar fotokopi modul BEM 500rb", category: "Alat Kantor", type: "expense", amount: 500000, status: "Sukses" },
+                    { id: 3, date: "18 Mei 2026", sender: "Siti Nurjanah", rawMessage: "dapat iuran anggota kas total ceban dari budi", category: "Kas Kelas", type: "income", amount: 10000, status: "Sukses" }
+                ],
+                budgets: {
+                    "Alat Kantor": { limit: 1000000, spent: 500000 },
+                    "Konsumsi": { limit: 1500000, spent: 0 },
+                    "Transportasi": { limit: 500000, spent: 0 },
+                    "Lain-lain": { limit: 500000, spent: 0 }
+                },
+                allowedSenders: [
+                    { name: "Budi (WA Admin)", phone: "6281234567890" },
+                    { name: "Siti Nurjanah", phone: "6289988776655" }
+                ],
+                aiRules: [
+                    { keyword: "goceng", category: "Lain-lain" },
+                    { keyword: "modul", category: "Alat Kantor" },
+                    { keyword: "ceban", category: "Kas Kelas" },
+                    { keyword: "kopi", category: "Konsumsi" }
+                ]
+            },
+            "personal": {
+                name: "Admin Nurhaliza",
+                email: "nurhaliza@personal.me",
+                categories: ["Gaji", "Makanan", "Investasi", "Transportasi", "Pakaian", "Lain-lain"],
+                transactions: [
+                    { id: 1, date: "19 Mei 2026", sender: "Saya", rawMessage: "gaji bulanan masuk 7.5jt", category: "Gaji", type: "income", amount: 7500000, status: "Sukses" },
+                    { id: 2, date: "19 Mei 2026", sender: "Saya", rawMessage: "beli bakso samrat 75ribu", category: "Makanan", type: "expense", amount: 75000, status: "Sukses" }
+                ],
+                budgets: {
+                    "Makanan": { limit: 2000000, spent: 75000 },
+                    "Transportasi": { limit: 1000000, spent: 0 },
+                    "Pakaian": { limit: 800000, spent: 0 },
+                    "Lain-lain": { limit: 500000, spent: 0 }
+                },
+                allowedSenders: [
+                    { name: "Nomor Utama Pribadi", phone: "6285721111111" }
+                ],
+                aiRules: [
+                    { keyword: "bakso", category: "Makanan" },
+                    { keyword: "gaji", category: "Gaji" }
+                ]
+            },
+            "umkm": {
+                name: "Kedai Kopi Kita (UMKM)",
+                email: "finance@kopikita.id",
+                categories: ["Penjualan", "Bahan Baku", "Gaji Karyawan", "Sewa Ruko", "Listrik & Air"],
+                transactions: [
+                    { id: 1, date: "19 Mei 2026", sender: "Kasir Roni", rawMessage: "pemasukan kassa hari ini 3.2jt", category: "Penjualan", type: "income", amount: 3200000, status: "Sukses" },
+                    { id: 2, date: "19 Mei 2026", sender: "Kasir Roni", rawMessage: "kulakan biji kopi gayo 1.5jt", category: "Bahan Baku", type: "expense", amount: 1500000, status: "Sukses" }
+                ],
+                budgets: {
+                    "Bahan Baku": { limit: 10000000, spent: 1500000 },
+                    "Gaji Karyawan": { limit: 4000000, spent: 0 },
+                    "Listrik & Air": { limit: 1500000, spent: 0 }
+                },
+                allowedSenders: [
+                    { name: "Kasir Roni", phone: "6282112233445" },
+                    { name: "Owner Anton", phone: "62811222333" }
+                ],
+                aiRules: [
+                    { keyword: "biji", category: "Bahan Baku" },
+                    { keyword: "penjualan", category: "Penjualan" }
+                ]
+            }
+        };
+
+        // Active Application State Trackers
+        let activeWorkspaceId = "bem-unpad";
+        let cashflowChartInstance = null;
+        let webhookTotalRequests = 124;
+        let isWebhookServerOnline = true;
+
+        // Header Title Map Configurations for Tab Transitions
+        const tabTitleConfig = {
+            'tab-ikhtisar': { title: 'Ikhtisar Dashboard', sub: 'Potret cepat arus kas & efisiensi kecerdasan buatan Anda bulan ini.' },
+            'tab-transaksi': { title: 'Catatan Transaksi (Ledger)', sub: 'Tinjau, edit, atau validasi seluruh data keuangan yang diparsing oleh WhatsApp Bot.' },
+            'tab-anggaran': { title: 'Anggaran & Aturan Klasifikasi', sub: 'Tentukan pagu batas pengeluaran bulanan dan latih perilaku parsing AI.' },
+            'tab-sinkronisasi': { title: 'Sinkronisasi WhatsApp Gateway', sub: 'Pantau status endpoint API Webhook dan atur izin pengirim.' },
+            'tab-laporan': { title: 'Generator Laporan Keuangan', sub: 'Ekspor laporan keuangan bersih siap kirim ke format formal PDF / Excel.' }
+        };
+
+        // ==========================================
+        // 2. INTERACTIVE ROUTING & DRAWER SYSTEM
+        // ==========================================
+        
+        // Navigation Switcher Event Listener loop
+        document.querySelectorAll('.nav-item').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetViewId = button.getAttribute('data-target');
+                
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(view => view.classList.add('hidden'));
+                // Disable active styles from other buttons
+                document.querySelectorAll('.nav-item').forEach(btn => {
+                    btn.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-navy-850/50 transition-all";
+                });
+
+                // Display clicked view
+                document.getElementById(targetViewId).classList.remove('hidden');
+                // Set Active nav item styles
+                button.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all bg-navy-850 text-white border border-navy-800/40";
+
+                // Modify page titles
+                document.getElementById('page-title').innerText = tabTitleConfig[targetViewId].title;
+                document.getElementById('page-subtitle').innerText = tabTitleConfig[targetViewId].sub;
+
+                // Close sidebar drawer (For mobile views)
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('mobile-sidebar-overlay').classList.add('hidden');
+
+                // Force layout recalculations
+                refreshAllUIRenderers();
+            });
+        });
+
+        // Workspace Selector Change Handler
+        document.getElementById('workspace-select').addEventListener('change', (e) => {
+            activeWorkspaceId = e.target.value;
+            
+            // Adjust header display card
+            const activeWS = workspaces[activeWorkspaceId];
+            document.getElementById('user-display-name').innerText = activeWS.name;
+            document.getElementById('user-display-email').innerText = activeWS.email;
+
+            // Reset filters dropdown option
+            populateCategoryFilterOptions();
+
+            // Refresh UI Views
+            refreshAllUIRenderers();
+            createToast("Berpindah Workspace", `Sekarang membuka workspace ${activeWS.name}`, "info");
+        });
+
+        // Mobile Responsive Drawer Toggle
+        document.getElementById('hamburger-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('mobile-sidebar-overlay').classList.remove('hidden');
+        });
+
+        document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('mobile-sidebar-overlay').classList.add('hidden');
+        });
+
+        document.getElementById('mobile-sidebar-overlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('mobile-sidebar-overlay').classList.add('hidden');
+        });
+
+        // ==========================================
+        // 3. REACTIVE UI RENDERING ENGINES
+        // ==========================================
+        
+        const formatRupiah = (val) => 'Rp ' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        // Core Global Refresh Loop
+        function refreshAllUIRenderers() {
+            renderKPIs();
+            renderLogsAndTableLedger();
+            renderBudgetBars();
+            renderCustomAiRulesList();
+            renderAllowedSendersList();
+            renderPDFLivePreviewDocument();
+            renderChartVisualizer();
+        }
+
+        // 1. Render Metrics (KPI Dashboard Cards)
+        function renderKPIs() {
+            const currentWS = workspaces[activeWorkspaceId];
+            
+            const totalIncome = currentWS.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = currentWS.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const netBalance = totalIncome - totalExpense;
+
+            document.getElementById('kpi-saldo').innerText = formatRupiah(netBalance);
+            document.getElementById('kpi-masuk').innerText = formatRupiah(totalIncome);
+            document.getElementById('kpi-keluar').innerText = formatRupiah(totalExpense);
+
+            // Change metric indicator alerts/helpers dynamically
+            const saldoSub = document.getElementById('kpi-saldo-sub');
+            if (netBalance < 0) {
+                saldoSub.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-400"></i> Defisit! Pengeluaran melebihi pemasukan.`;
+            } else {
+                saldoSub.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> Arus kas sehat &amp; aman.`;
+            }
+        }
+
+        // Populate Categories for filter select element
+        function populateCategoryFilterOptions() {
+            const catSelect = document.getElementById('filter-category');
+            const manualCatSelect = document.getElementById('manual-cat');
+            const ruleCatSelect = document.getElementById('rule-category');
+            
+            catSelect.innerHTML = '<option value="all">Semua Kategori</option>';
+            manualCatSelect.innerHTML = '';
+            ruleCatSelect.innerHTML = '';
+
+            workspaces[activeWorkspaceId].categories.forEach(cat => {
+                catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                manualCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+                ruleCatSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
+        // 2. Render Transaction Ledger and Live activity log feed stream
+        function renderLogsAndTableLedger() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const ledgerBody = document.getElementById('ledger-table-body');
+            const logsContainer = document.getElementById('overview-recent-logs');
+            
+            ledgerBody.innerHTML = '';
+            logsContainer.innerHTML = '';
+
+            if (currentWS.transactions.length === 0) {
+                ledgerBody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-500 font-medium italic">Tidak ada transaksi terdaftar. Kirim pesan WA untuk memulai!</td></tr>`;
+                logsContainer.innerHTML = `<div class="p-4 text-center text-slate-500 text-xs italic">Menunggu input webhook...</div>`;
+                return;
+            }
+
+            // Render table ledger rows
+            currentWS.transactions.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-navy-850/30 text-slate-300 transition-colors";
+                
+                const badgeClass = t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-blue-500/10 text-blue-400';
+                const signVal = t.type === 'income' ? `+ ${formatRupiah(t.amount)}` : `- ${formatRupiah(t.amount)}`;
+                const signColor = t.type === 'income' ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold';
+
+                tr.innerHTML = `
+                    <td class="py-4 px-5 font-mono text-xs">${t.date}</td>
+                    <td class="py-4 px-5 font-semibold text-xs text-white">${t.sender}</td>
+                    <td class="py-4 px-5 text-xs truncate max-w-[200px]" title="${t.rawMessage}">"${t.rawMessage}"</td>
+                    <td class="py-4 px-5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${badgeClass}">${t.category}</span></td>
+                    <td class="py-4 px-5 text-right text-xs ${signColor}">${signVal}</td>
+                    <td class="py-4 px-5 text-center"><span class="text-[10px] font-bold text-emerald-400 flex items-center justify-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${t.status}</span></td>
+                    <td class="py-4 px-5 text-center">
+                        <button onclick="handleDeleteTransactionRow(${t.id})" class="text-slate-500 hover:text-red-400 p-1.5 rounded-lg transition-colors" title="Hapus"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </td>
+                `;
+                ledgerBody.appendChild(tr);
+
+                // Populate live logs sidebar feeds
+                const logItem = document.createElement('div');
+                logItem.className = "p-3 rounded-xl bg-navy-950/80 border border-navy-850/60 flex items-center justify-between hover:border-navy-800 transition-all";
+                logItem.innerHTML = `
+                    <div class="overflow-hidden pr-2">
+                        <p class="text-xs font-bold text-white truncate">"${t.rawMessage}"</p>
+                        <p class="text-[10px] text-slate-500 mt-1">AI: ${t.category} • ${signVal}</p>
+                    </div>
+                    <span class="text-[9px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 shrink-0">Sukses</span>
+                `;
+                logsContainer.appendChild(logItem);
+            });
+        }
+
+        // 3. Render Budget Limit Progress visual indicators
+        function renderBudgetBars() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const container = document.getElementById('budget-progress-container');
+            container.innerHTML = '';
+
+            const categories = Object.keys(currentWS.budgets);
+
+            if (categories.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 italic">Pagu anggaran tidak dikonfigurasi untuk kategori saat ini.</p>`;
+                return;
+            }
+
+            categories.forEach(cat => {
+                const b = currentWS.budgets[cat];
+                const percentage = Math.min(Math.round((b.spent / b.limit) * 100), 100);
+                
+                // Set color threshold alarms
+                let fillBarColor = 'bg-whatsapp';
+                let alertColor = 'text-slate-400';
+                if (percentage >= 90) {
+                    fillBarColor = 'bg-red-500';
+                    alertColor = 'text-red-400 font-bold';
+                } else if (percentage >= 75) {
+                    fillBarColor = 'bg-amber-500';
+                    alertColor = 'text-amber-400 font-semibold';
+                }
+
+                const barDiv = document.createElement('div');
+                barDiv.className = "space-y-2";
+                barDiv.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-white">${cat}</span>
+                        <span class="font-semibold ${alertColor}">${formatRupiah(b.spent)} / ${formatRupiah(b.limit)} (${percentage}%)</span>
+                    </div>
+                    <div class="w-full bg-navy-950 rounded-full h-2 overflow-hidden border border-navy-850">
+                        <div class="h-full rounded-full ${fillBarColor} transition-all duration-500" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(barDiv);
+            });
+        }
+
+        // 4. Render Whitelisted custom AI Rules
+        function renderCustomAiRulesList() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const container = document.getElementById('rules-list-container');
+            container.innerHTML = '';
+
+            if (currentWS.aiRules.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 italic">Belum ada aturan klasifikasi. Atur aturan kustom di atas!</p>`;
+                return;
+            }
+
+            currentWS.aiRules.forEach((rule, idx) => {
+                const ruleDiv = document.createElement('div');
+                ruleDiv.className = "flex justify-between items-center p-2.5 rounded-xl bg-navy-950 border border-navy-850 text-xs";
+                ruleDiv.innerHTML = `
+                    <div>
+                        <span class="font-mono text-emerald-400 font-bold">"${rule.keyword}"</span>
+                        <span class="text-slate-500"> → Kategori </span>
+                        <span class="font-bold text-white">${rule.category}</span>
+                    </div>
+                    <button onclick="handleRemoveAiRule(${idx})" class="text-slate-500 hover:text-red-400 transition-colors" title="Hapus"><i class="fa-solid fa-circle-xmark"></i></button>
+                `;
+                container.appendChild(ruleDiv);
+            });
+        }
+
+        // 5. Render Approved Whitelisted Senders (Security whitelist ledger)
+        function renderAllowedSendersList() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const container = document.getElementById('allowed-senders-container');
+            container.innerHTML = '';
+
+            if (currentWS.allowedSenders.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 italic">Belum ada nomor pengirim terdaftar. Input data baru di bawah.</p>`;
+                return;
+            }
+
+            currentWS.allowedSenders.forEach((sender, idx) => {
+                const sDiv = document.createElement('div');
+                sDiv.className = "p-3 rounded-xl bg-navy-950 border border-navy-850 flex items-center justify-between text-xs hover:border-navy-800 transition-all";
+                sDiv.innerHTML = `
+                    <div>
+                        <p class="font-bold text-white">${sender.name}</p>
+                        <p class="text-[10px] text-slate-500 font-mono mt-0.5"><i class="fa-brands fa-whatsapp text-emerald-500"></i> +${sender.phone}</p>
+                    </div>
+                    <button onclick="handleRemoveAllowedSender(${idx})" class="text-slate-500 hover:text-red-400 transition-colors" title="Hapus Whitelist"><i class="fa-solid fa-trash text-xs"></i></button>
+                `;
+                container.appendChild(sDiv);
+            });
+        }
+
+        // 6. Render Laporan PDF Live preview Document sheet
+        function renderPDFLivePreviewDocument() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const previewContainer = document.getElementById('pdf-preview-rows');
+            const periodValue = document.getElementById('report-period').value;
+            
+            previewContainer.innerHTML = '';
+
+            // Update PDF titles and headers
+            document.getElementById('pdf-header-title').innerText = `LAPORAN ARUS KAS MASUK & KELUAR`;
+            document.getElementById('pdf-header-sub').innerText = currentWS.name;
+            
+            const metaPeriod = periodValue === 'this-month' ? 'Mei 2026' : periodValue === 'last-month' ? 'April 2026' : 'Seluruh Riwayat';
+            document.getElementById('pdf-meta-period').innerText = metaPeriod;
+
+            // Fitur filter periodik laporan
+            let filteredTx = currentWS.transactions;
+            if (periodValue === 'last-month') {
+                filteredTx = []; // Simulating empty ledger for last month mock
+            }
+
+            if (filteredTx.length === 0) {
+                previewContainer.innerHTML = `<div class="text-center py-6 text-slate-400 text-[10px] italic">Tidak ada catatan transaksi untuk periode ini.</div>`;
+                return;
+            }
+
+            filteredTx.forEach(t => {
+                const debit = t.type === 'income' ? formatRupiah(t.amount) : '-';
+                const kredit = t.type === 'expense' ? formatRupiah(t.amount) : '-';
+
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "grid grid-cols-12 border-b border-slate-200 pb-1 text-slate-700";
+                rowDiv.innerHTML = `
+                    <div class="col-span-3 text-[9px] font-sans">${t.date}</div>
+                    <div class="col-span-5 text-[9px] font-sans truncate pr-2" title="${t.rawMessage}">"${t.rawMessage}"</div>
+                    <div class="col-span-2 text-right text-[9px] font-sans text-emerald-600">${debit}</div>
+                    <div class="col-span-2 text-right text-[9px] font-sans text-red-600">${kredit}</div>
+                `;
+                previewContainer.appendChild(rowDiv);
+            });
+        }
+
+        // ==========================================
+        // 4. CHART.JS VISUAL CONFIGURATION
+        // ==========================================
+        function renderChartVisualizer() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const ctx = document.getElementById('cashflowChart').getContext('2d');
+
+            const totalIncome = currentWS.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = currentWS.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
+            // Destroy previous chart drawing state to prevent overlay artifacts
+            if (cashflowChartInstance) {
+                cashflowChartInstance.destroy();
+            }
+
+            // Create beautiful responsive Bar layout
+            cashflowChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pemasukan (+)', 'Pengeluaran (-)'],
+                    datasets: [{
+                        data: [totalIncome, totalExpense],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.25)', // WhatsApp Emerald Transparent
+                            'rgba(239, 68, 68, 0.25)'   // Red Warning Transparent
+                        ],
+                        borderColor: [
+                            '#10b981',
+                            '#ef4444'
+                        ],
+                        borderWidth: 1.5,
+                        borderRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: '#9ca3af',
+                                font: { size: 10 },
+                                callback: function(value) { return 'Rp ' + value/1000 + 'k'; }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#ffffff', font: { weight: 'bold', size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // 5. DATA STATE MUTATION HANDLERS (CRUD)
+        // ==========================================
+        
+        // Open/Close dialog modals
+        function openManualTransactionModal() {
+            document.getElementById('manual-modal').classList.remove('hidden');
+        }
+        function closeManualTransactionModal() {
+            document.getElementById('manual-modal').classList.add('hidden');
+            document.getElementById('manual-transaction-form').reset();
+        }
+
+        // Insert Manual Form Submission Handler
+        document.getElementById('manual-transaction-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const currentWS = workspaces[activeWorkspaceId];
+            
+            const desc = document.getElementById('manual-desc').value;
+            const type = document.getElementById('manual-type').value;
+            const amount = parseInt(document.getElementById('manual-amount').value);
+            const category = document.getElementById('manual-cat').value;
+
+            const mockTx = {
+                id: Date.now(),
+                date: "19 Mei 2026",
+                sender: "Admin (Manual)",
+                rawMessage: `[Input Manual] ${desc}`,
+                category: category,
+                type: type,
+                amount: amount,
+                status: "Sukses"
+            };
+
+            currentWS.transactions.unshift(mockTx);
+
+            // Update Budget spend limits if it is expense
+            if (type === 'expense' && currentWS.budgets[category]) {
+                currentWS.budgets[category].spent += amount;
+            }
+
+            closeManualTransactionModal();
+            refreshAllUIRenderers();
+            createToast("Transaksi Manual Tersimpan", `Berhasil mencatat "${desc}"`, "success");
+        });
+
+        // Delete Row trigger handler
+        function handleDeleteTransactionRow(id) {
+            const currentWS = workspaces[activeWorkspaceId];
+            const target = currentWS.transactions.find(t => t.id === id);
+
+            if (target && confirm(`Apakah Anda yakin ingin menghapus catatan "${target.rawMessage}"?`)) {
+                // Return spent budget limit
+                if (target.type === 'expense' && currentWS.budgets[target.category]) {
+                    currentWS.budgets[target.category].spent = Math.max(0, currentWS.budgets[target.category].spent - target.amount);
+                }
+
+                currentWS.transactions = currentWS.transactions.filter(t => t.id !== id);
+                refreshAllUIRenderers();
+                createToast("Transaksi Dihapus", "Catatan berhasil dibersihkan dari database.", "warning");
+            }
+        }
+
+        // Register custom AI classification rules
+        document.getElementById('add-rule-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const currentWS = workspaces[activeWorkspaceId];
+            const keyword = document.getElementById('rule-keyword').value.trim().toLowerCase();
+            const category = document.getElementById('rule-category').value;
+
+            // Check duplicates
+            if (currentWS.aiRules.some(r => r.keyword === keyword)) {
+                alert("Aturan kosa kata tersebut sudah ada!");
+                return;
+            }
+
+            currentWS.aiRules.push({ keyword, category });
+            document.getElementById('add-rule-form').reset();
+            refreshAllUIRenderers();
+            createToast("Aturan AI Ditambahkan", `Kosa kata "${keyword}" akan dipetakan ke "${category}"`, "success");
+        });
+
+        // Remove custom AI rules mapping
+        function handleRemoveAiRule(idx) {
+            const currentWS = workspaces[activeWorkspaceId];
+            currentWS.aiRules.splice(idx, 1);
+            refreshAllUIRenderers();
+            createToast("Aturan AI Dihapus", "Aturan kosa kata dibersihkan dari server.", "warning");
+        }
+
+        // Add Approved whitelisted user phone
+        document.getElementById('add-sender-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const currentWS = workspaces[activeWorkspaceId];
+            const name = document.getElementById('sender-name').value.trim();
+            const phone = document.getElementById('sender-phone').value.trim();
+
+            currentWS.allowedSenders.push({ name, phone });
+            document.getElementById('add-sender-form').reset();
+            refreshAllUIRenderers();
+            createToast("Pengirim Ditambahkan", `${name} ditambahkan ke daftar verifikasi.`, "success");
+        });
+
+        // Remove approved whitelisted user
+        function handleRemoveAllowedSender(idx) {
+            const currentWS = workspaces[activeWorkspaceId];
+            currentWS.allowedSenders.splice(idx, 1);
+            refreshAllUIRenderers();
+            createToast("Pengirim Dihapus", "Nomor terhapus dari daftar whitelist.", "warning");
+        }
+
+        // Webhook configuration helper triggers
+        function toggleServerConnection() {
+            const btn = document.getElementById('connection-status-toggle');
+            isWebhookServerOnline = !isWebhookServerOnline;
+
+            if (isWebhookServerOnline) {
+                btn.className = "px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-bold flex items-center gap-1.5 transition-all";
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Server Aktif (Online)`;
+                createToast("Server Online", "Sistem Webhook Meta Cloud Business API aktif.", "success");
+            } else {
+                btn.className = "px-3.5 py-1.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-[11px] font-bold flex items-center gap-1.5 transition-all";
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Server Terputus (Offline)`;
+                createToast("Server Offline", "Server diistirahatkan sementara.", "warning");
+            }
+        }
+
+        function copyWebhookEndpoint() {
+            const urlInput = document.getElementById('webhook-url-input');
+            navigator.clipboard.writeText(urlInput.value);
+            createToast("URL Disalin", "Endpoint webhook berhasil disalin ke clipboard.", "info");
+        }
+
+        // ==========================================
+        // 6. WHATSAPP FLOATING SIMULATOR CORE ENGINE
+        // ==========================================
+        function toggleWhatsAppSimulator() {
+            const chatBox = document.getElementById('wa-simulator-box');
+            chatBox.classList.toggle('hidden');
+            const messagesArea = document.getElementById('wa-chat-messages');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // Message submit handler
+        document.getElementById('wa-chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const chatInput = document.getElementById('wa-chat-input');
+            const msgText = chatInput.value.trim();
+
+            if (!msgText) return;
+
+            // Render User Bubble
+            renderWAMessageBubble(msgText, 'user');
+            chatInput.value = '';
+
+            const messagesArea = document.getElementById('wa-chat-messages');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+
+            if (!isWebhookServerOnline) {
+                setTimeout(() => {
+                    renderWAMessageBubble("⚠️ *SERVER OFFLINE*\n\nSistem gagal merespon pesan karena server sedang dalam masa maintenance.", 'bot');
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                }, 800);
+                return;
+            }
+
+            // Increase API requests stats counter
+            webhookTotalRequests++;
+            document.getElementById('sync-total-webhooks').innerText = webhookTotalRequests;
+            document.getElementById('gateway-latency-txt').innerText = `${Math.floor(Math.random() * 20) + 35}ms`;
+
+            // Simulating parsing processing state delay
+            setTimeout(() => {
+                const pendingBubble = renderWAMessageBubble("AI menyaring keuangan...", 'temp-process');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+
+                setTimeout(() => {
+                    pendingBubble.remove();
+
+                    // Parse the input via local mock NLP Engine
+                    const parsedResult = parseConversationalChatNLP(msgText);
+
+                    if (parsedResult.success) {
+                        const successReply = `*BERHASIL DIARSIPKAN* ✅\n\n` +
+                                             `• *Kategori:* ${parsedResult.category}\n` +
+                                             `• *Nominal:* ${formatRupiah(parsedResult.amount)}\n` +
+                                             `• *Aliran:* ${parsedResult.type === 'expense' ? 'Pengeluaran (-)' : 'Pemasukan (+)'}\n\n` +
+                                             `_Database dashboard terupdate secara real-time._`;
+                        
+                        renderWAMessageBubble(successReply, 'bot');
+
+                        // Save transaction to active workspace
+                        const currentWS = workspaces[activeWorkspaceId];
+                        currentWS.transactions.unshift({
+                            id: Date.now(),
+                            date: "19 Mei 2026",
+                            sender: "Siti Nurjanah",
+                            rawMessage: msgText,
+                            category: parsedResult.category,
+                            type: parsedResult.type,
+                            amount: parsedResult.amount,
+                            status: "Sukses"
+                        });
+
+                        // Deduct budget limits spent
+                        if (parsedResult.type === 'expense' && currentWS.budgets[parsedResult.category]) {
+                            currentWS.budgets[parsedResult.category].spent += parsedResult.amount;
+                        }
+
+                        // Trigger visual refresh loop
+                        refreshAllUIRenderers();
+                        createToast("Parsing Chat Berhasil", `Kategori "${parsedResult.category}" bernilai ${formatRupiah(parsedResult.amount)} ditambahkan!`, "success");
+                    } else {
+                        const failReply = `❌ *AI GAGAL MENYARING CHAT*\n\n` +
+                                          `Sistem tidak dapat mengidentifikasi pola nominal angka pada kalimat Anda.\n\n` +
+                                          `_Gunakan format kasual seperti:_ "beli bensin goceng" atau "terima iuran kas 50k"`;
+                        renderWAMessageBubble(failReply, 'bot');
+                        createToast("Parsing Chat Gagal", "AI gagal mengonstruksi nominal keuangan.", "danger");
+                    }
+
+                    messagesArea.scrollTop = messagesArea.scrollHeight;
+                }, 1000);
+
+            }, 400);
+        });
+
+        // Appending chat bubbles helpers
+        function renderWAMessageBubble(text, type) {
+            const container = document.getElementById('wa-chat-messages');
+            const bubble = document.createElement('div');
+
+            if (type === 'user') {
+                bubble.className = "self-end max-w-[85%] bg-[#005c4b] text-white text-xs p-2.5 rounded-l-lg rounded-br-lg shadow-md animate-fade-in";
+                bubble.innerHTML = `<p>${escapeHTML(text)}</p><span class="block text-[8px] text-emerald-300 text-right mt-1">12:12</span>`;
+            } else if (type === 'bot') {
+                bubble.className = "self-start max-w-[85%] bg-[#1f2c34] text-slate-200 text-xs p-2.5 rounded-r-lg rounded-bl-lg shadow-md border-l-4 border-whatsapp animate-fade-in";
+                bubble.innerHTML = `<p class="font-semibold text-whatsapp mb-1">FinChat.AI Bot 🤖</p><p style="white-space: pre-line;">${text}</p><span class="block text-[8px] text-slate-500 mt-1">12:12</span>`;
+            } else if (type === 'temp-process') {
+                bubble.className = "self-start max-w-[85%] bg-[#1f2c34] text-slate-400 text-[10px] p-2 rounded-lg italic animate-pulse";
+                bubble.innerText = text;
+            }
+
+            container.appendChild(bubble);
+            return bubble;
+        }
+
+        // Localized Mock NLP Chat Parser
+        function parseConversationalChatNLP(text) {
+            const currentWS = workspaces[activeWorkspaceId];
+            const cleanText = text.toLowerCase().trim();
+            
+            let amount = 0;
+            let type = 'expense';
+            let category = currentWS.categories[currentWS.categories.length - 1] || 'Lain-lain';
+
+            // 1. Process local whitelisted AI custom rules
+            let matchedCategory = null;
+            currentWS.aiRules.forEach(rule => {
+                if (cleanText.includes(rule.keyword)) {
+                    matchedCategory = rule.category;
+                }
+            });
+
+            // 2. Extract Slang Nominal Indonesian scale
+            if (cleanText.includes("goceng")) amount = 5000;
+            else if (cleanText.includes("ceban")) amount = 10000;
+            else if (cleanText.includes("gocap")) amount = 50000;
+            else if (cleanText.match(/\b\d+[\s]*(k|rb|ribu|jt|juta)?\b/)) {
+                const match = cleanText.match(/(\d+(?:\.\d+)?)\s*(k|rb|ribu|jt|juta)?/);
+                if (match) {
+                    let baseVal = parseFloat(match[1]);
+                    let suffix = match[2] || '';
+
+                    if (suffix === 'k' || suffix === 'rb' || suffix === 'ribu') amount = baseVal * 1000;
+                    else if (suffix === 'jt' || suffix === 'juta') amount = baseVal * 1000000;
+                    else {
+                        const cleanNum = cleanText.replace(/\./g, '').match(/\d+/);
+                        amount = parseInt(cleanNum[0]);
+                    }
+                }
+            } else {
+                return { success: false };
+            }
+
+            // 3. Determine flow type (Income or Expense)
+            if (cleanText.includes("terima") || cleanText.includes("masuk") || cleanText.includes("donasi") || cleanText.includes("iuran")) {
+                type = 'income';
+                category = matchedCategory || 'Donasi';
+                if (cleanText.includes("kas") || cleanText.includes("iuran")) {
+                    category = currentWS.categories.includes("Kas Kelas") ? "Kas Kelas" : "Penjualan";
+                }
+            } else {
+                type = 'expense';
+                category = matchedCategory || 'Alat Kantor';
+                if (cleanText.includes("bensin") || cleanText.includes("ojek")) {
+                    category = currentWS.categories.includes("Transportasi") ? "Transportasi" : "Lain-lain";
+                }
+                if (cleanText.includes("makan") || cleanText.includes("kopi") || cleanText.includes("snack")) {
+                    category = currentWS.categories.includes("Konsumsi") ? "Konsumsi" : "Makanan";
+                }
+            }
+
+            return { success: true, amount, type, category };
+        }
+
+        // HTML escaping protection helper
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // ==========================================
+        // 7. EXPORT DOWNLOAD SIMULATOR & TOASTS
+        // ==========================================
+        function simulateCSVExport() {
+            createToast("Menyiapkan CSV", "Mengekstrak baris tabel menjadi data terpisah koma...", "info");
+            setTimeout(() => {
+                alert("Sukses! File 'finchat_report_2026.csv' berhasil didownload.");
+                createToast("Ekspor Sukses", "Berkas CSV tersimpan di sistem lokal Anda.", "success");
+            }, 1000);
+        }
+
+        function simulatePDFExport() {
+            createToast("Menyiapkan PDF", "Melakukan rendering dokumen administrasi formal...", "info");
+            setTimeout(() => {
+                alert("Sukses! File 'finchat_report_2026.pdf' berhasil dicetak.");
+                createToast("Ekspor Sukses", "Dokumen PDF tersimpan di folder downloads.", "success");
+            }, 1000);
+        }
+
+        // Dynamic interactive toast triggers
+        function createToast(title, message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let borderCol = "border-whatsapp";
+            let iconCode = `<i class="fa-solid fa-circle-check text-whatsapp"></i>`;
+            if (type === 'warning') {
+                borderCol = "border-amber-500";
+                iconCode = `<i class="fa-solid fa-circle-exclamation text-amber-500"></i>`;
+            } else if (type === 'danger') {
+                borderCol = "border-red-500";
+                iconCode = `<i class="fa-solid fa-circle-xmark text-red-500"></i>`;
+            } else if (type === 'info') {
+                borderCol = "border-blue-500";
+                iconCode = `<i class="fa-solid fa-circle-info text-blue-500"></i>`;
+            }
+
+            toast.className = `p-4 bg-navy-900 border-l-4 ${borderCol} rounded-xl shadow-2xl flex items-start gap-3 w-80 animate-fade-in pointer-events-auto`;
+            toast.innerHTML = `
+                <div class="text-base mt-0.5">${iconCode}</div>
+                <div class="flex-grow">
+                    <h4 class="font-title font-bold text-xs text-white">${title}</h4>
+                    <p class="text-[10px] text-slate-400 mt-1 leading-normal mb-0">${message}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-white transition-colors text-xs"><i class="fa-solid fa-xmark"></i></button>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 4000);
+        }
+
+        // Dropdown notifications mock simulation
+        function showNotificationDropdown() {
+            document.getElementById('notif-badge').className = "hidden";
+            createToast("Pemberitahuan", "Seluruh log pesan WhatsApp baru berhasil diparsing.", "info");
+        }
+
+        // Form Filtering on Ledger Data Search
+        document.getElementById('filter-type').addEventListener('change', runDataFilters);
+        document.getElementById('filter-category').addEventListener('change', runDataFilters);
+        document.getElementById('search-transactions').addEventListener('input', runDataFilters);
+
+        function runDataFilters() {
+            const currentWS = workspaces[activeWorkspaceId];
+            const typeVal = document.getElementById('filter-type').value;
+            const catVal = document.getElementById('filter-category').value;
+            const searchVal = document.getElementById('search-transactions').value.toLowerCase();
+
+            const tableRows = document.querySelectorAll('#ledger-table-body tr');
+
+            currentWS.transactions.forEach((t, idx) => {
+                const tr = tableRows[idx];
+                if (!tr) return;
+
+                let matchType = (typeVal === 'all' || t.type === typeVal);
+                let matchCat = (catVal === 'all' || t.category === catVal);
+                let matchSearch = t.rawMessage.toLowerCase().includes(searchVal) || t.sender.toLowerCase().includes(searchVal);
+
+                if (matchType && matchCat && matchSearch) {
+                    tr.classList.remove('hidden');
+                } else {
+                    tr.classList.add('hidden');
+                }
+            });
+        }
+
+        function handleLogout() {
+            if (confirm("Apakah Anda ingin keluar dari dashboard?")) {
+                alert("Kembali ke halaman autentikasi.");
+            }
+        }
+
+        // App Initial Bootstrapping
+        populateCategoryFilterOptions();
+        refreshAllUIRenderers();
+    </script>
+</body>
+</html>
