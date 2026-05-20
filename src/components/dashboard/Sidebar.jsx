@@ -14,10 +14,8 @@ export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onW
     <aside className={`fixed inset-y-0 left-0 w-64 bg-navy-900 border-r border-navy-850/70 flex flex-col justify-between z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-full ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div>
         <div className="h-20 px-6 border-b border-navy-850 flex items-center justify-between">
-          <a href="/" className="flex items-center">
-            <div className="bg-white px-3 py-1.5 rounded-xl flex items-center justify-center shadow-md shadow-emerald-950/20 hover:scale-105 transition-transform duration-200">
-              <img src="/logo.png" alt="FinChat Logo" className="h-8 w-auto object-contain" />
-            </div>
+          <a href="/" className="flex items-center hover:scale-105 transition-transform duration-200">
+            <img src="/logo.png" alt="FinChat Logo" className="h-14 w-auto object-contain" />
           </a>
           <button className="md:hidden text-slate-400 hover:text-white transition-colors" onClick={onCloseSidebar}>
             <i className="fa-solid fa-xmark text-xl"></i>

@@ -17,6 +17,15 @@ export const metadata = {
   title: "FinChat.AI — Dashboard Keuangan Conversational via WhatsApp",
   description:
     "Catat keuangan organisasi langsung dari obrolan WhatsApp. AI mengubah chat kasual menjadi laporan keuangan profesional secara otomatis.",
+  icons: {
+    icon: [
+      { url: "/logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo.png", sizes: "32x32", type: "image/png" }
+    ],
+    apple: [
+      { url: "/logo.png", sizes: "180x180", type: "image/png" }
+    ]
+  },
   keywords: [
     "keuangan",
     "whatsapp",

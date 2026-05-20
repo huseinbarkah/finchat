@@ -17,16 +17,8 @@ export default function LandingPage() {
     const h = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", h);
 
-    const timer = setTimeout(() => {
-      if (!sessionStorage.getItem("promoSeen")) {
-        setShowPromo(true);
-        sessionStorage.setItem("promoSeen", "true");
-      }
-    }, 1500);
-
     return () => {
       window.removeEventListener("scroll", h);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -40,17 +32,14 @@ export default function LandingPage() {
     <div className="min-h-screen bg-navy-950 overflow-x-hidden">
       {/* ── NAVBAR ── */}
       <nav
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-          scrolled
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled
             ? "bg-navy-900/90 backdrop-blur-xl border-b border-navy-850/60 shadow-lg"
             : "bg-transparent"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <a href="#" className="flex items-center">
-            <div className="bg-white px-3 py-1.5 rounded-xl flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-200">
-              <img src="/logo.png" alt="FinChat Logo" className="h-7 w-auto object-contain" />
-            </div>
+          <a href="#" className="flex items-center hover:scale-105 transition-transform duration-200">
+            <img src="/logo.png" alt="FinChat Logo" className="h-12 w-auto object-contain" />
           </a>
 
           {/* Desktop Nav Links */}
@@ -73,12 +62,12 @@ export default function LandingPage() {
             >
               Harga
             </a>
-            <Link
-              href="/dashboard"
+            <a
+              href="#pricing"
               className="px-5 py-2 rounded-xl bg-whatsapp hover:bg-whatsapp-dark text-navy-950 font-bold text-sm transition-all shadow-glow-emerald"
             >
-              Buka Dashboard →
-            </Link>
+              Daftar
+            </a>
           </div>
 
           {/* Mobile menu button */}
@@ -116,12 +105,13 @@ export default function LandingPage() {
             >
               Harga
             </a>
-            <Link
-              href="/dashboard"
+            <a
+              href="#pricing"
+              onClick={() => setMobileNav(false)}
               className="block w-full text-center py-2.5 rounded-xl bg-whatsapp text-navy-950 font-bold text-sm"
             >
-              Buka Dashboard →
-            </Link>
+              Daftar
+            </a>
           </div>
         )}
       </nav>
@@ -350,11 +340,10 @@ export default function LandingPage() {
             ].map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl p-6 flex flex-col transition-all ${
-                  plan.highlight
+                className={`rounded-2xl p-6 flex flex-col transition-all ${plan.highlight
                     ? "bg-gradient-to-b from-navy-900 to-navy-950 border-2 border-whatsapp/40 shadow-glow-emerald scale-105 relative"
                     : "bg-navy-900 border border-navy-850 hover:border-navy-800"
-                }`}
+                  }`}
               >
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-whatsapp text-navy-950 text-[10px] font-extrabold uppercase tracking-wider">
@@ -386,16 +375,29 @@ export default function LandingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href="/dashboard"
-                  className={`w-full py-3 rounded-xl text-sm font-bold text-center transition-all ${
-                    plan.highlight
-                      ? "bg-whatsapp hover:bg-whatsapp-dark text-navy-950 shadow-glow-emerald"
-                      : "bg-navy-800 hover:bg-navy-750 text-white border border-navy-800"
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.price === "Rp 0" ? (
+                  <Link
+                    href="/dashboard"
+                    className={`w-full py-3 rounded-xl text-sm font-bold text-center transition-all ${plan.highlight
+                        ? "bg-whatsapp hover:bg-whatsapp-dark text-navy-950 shadow-glow-emerald"
+                        : "bg-navy-800 hover:bg-navy-750 text-white border border-navy-800"
+                      }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                ) : (
+                  <a
+                    href={`https://wa.me/6282339265052?text=Halo%20FinChat.AI%2C%20saya%20tertarik%20untuk%20berlangganan%20*Paket%20${plan.name}*%20(${plan.price}${plan.period}).%20Bagaimana%20prosedur%20pembayarannya%3F`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-full py-3 rounded-xl text-sm font-bold text-center transition-all block ${plan.highlight
+                        ? "bg-whatsapp hover:bg-whatsapp-dark text-navy-950 shadow-glow-emerald"
+                        : "bg-navy-800 hover:bg-navy-750 text-white border border-navy-800"
+                      }`}
+                  >
+                    {plan.cta}
+                  </a>
+                )}
               </div>
             ))}
           </div>
@@ -405,10 +407,8 @@ export default function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className="border-t border-navy-850 py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center">
-            <div className="bg-white px-2.5 py-1 rounded-lg flex items-center justify-center shadow-md">
-              <img src="/logo.png" alt="FinChat Logo" className="h-6 w-auto object-contain" />
-            </div>
+          <div className="flex items-center hover:scale-105 transition-transform duration-200">
+            <img src="/logo.png" alt="FinChat Logo" className="h-10 w-auto object-contain" />
           </div>
 
           <div className="flex items-center gap-6">
@@ -522,11 +522,10 @@ function SimulatorDemo() {
           {messages.map((m, i) => (
             <div
               key={i}
-              className={`max-w-[85%] text-xs p-3 rounded-lg shadow-md animate-fade-in ${
-                m.type === "user"
+              className={`max-w-[85%] text-xs p-3 rounded-lg shadow-md animate-fade-in ${m.type === "user"
                   ? "self-end bg-[#005c4b] text-white rounded-br-none"
                   : "self-start bg-[#1f2c34] text-slate-200 rounded-bl-none border-l-4 border-whatsapp"
-              }`}
+                }`}
             >
               {m.type === "bot" && (
                 <p className="font-semibold text-whatsapp mb-1">
