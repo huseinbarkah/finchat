@@ -143,7 +143,7 @@ export default function LandingPage() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-whatsapp/10 border border-whatsapp/20 mb-8 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-whatsapp animate-pulse"></span>
             <span className="text-xs font-semibold text-whatsapp">
-              Powered by Google Gemini AI
+              Build With Love
             </span>
           </div>
 
@@ -321,7 +321,7 @@ export default function LandingPage() {
               },
               {
                 name: "Pro",
-                price: "Rp 29.000",
+                price: "Rp 39.000",
                 period: "/ bulan",
                 highlight: true,
                 features: [
@@ -617,10 +617,10 @@ function PromoModal({ onClose, onSelectPlan }) {
               <h3 className="font-bold text-white text-lg mb-1">Paket Pro</h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm text-slate-500 line-through">
-                  Rp 99.000
+                  Rp 39.000
                 </span>
                 <span className="text-2xl font-extrabold text-whatsapp">
-                  Rp 49.000
+                  Rp 19.500
                   <span className="text-xs text-slate-400 font-normal">
                     /bln
                   </span>
@@ -642,7 +642,7 @@ function PromoModal({ onClose, onSelectPlan }) {
               </ul>
               <button
                 onClick={() =>
-                  onSelectPlan({ name: "Pro Promo", price: 49000 })
+                  onSelectPlan({ name: "Pro Promo", price: 19500 })
                 }
                 className="w-full py-2.5 rounded-xl bg-whatsapp hover:bg-whatsapp-dark text-navy-950 font-bold text-sm transition-all shadow-glow-emerald"
               >
@@ -660,10 +660,10 @@ function PromoModal({ onClose, onSelectPlan }) {
               </h3>
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-sm text-slate-500 line-through">
-                  Rp 299.000
+                  Rp 199.000
                 </span>
                 <span className="text-2xl font-extrabold text-blue-400">
-                  Rp 199.000
+                  Rp 132.330
                   <span className="text-xs text-slate-400 font-normal">
                     /bln
                   </span>
@@ -685,7 +685,7 @@ function PromoModal({ onClose, onSelectPlan }) {
               </ul>
               <button
                 onClick={() =>
-                  onSelectPlan({ name: "Business Promo", price: 199000 })
+                  onSelectPlan({ name: "Business Promo", price: 132330 })
                 }
                 className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-900/50"
               >
