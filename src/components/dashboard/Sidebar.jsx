@@ -14,11 +14,10 @@ export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onW
     <aside className={`fixed inset-y-0 left-0 w-64 bg-navy-900 border-r border-navy-850/70 flex flex-col justify-between z-50 transform transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-full ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div>
         <div className="h-20 px-6 border-b border-navy-850 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-whatsapp to-emerald-400 flex items-center justify-center text-white shadow-md shadow-whatsapp/15">
-              <i className="fa-brands fa-whatsapp text-lg"></i>
+          <a href="/" className="flex items-center">
+            <div className="bg-white px-3 py-1.5 rounded-xl flex items-center justify-center shadow-md shadow-emerald-950/20 hover:scale-105 transition-transform duration-200">
+              <img src="/logo.png" alt="FinChat Logo" className="h-8 w-auto object-contain" />
             </div>
-            <span className="font-[var(--font-title)] font-extrabold text-lg text-white tracking-tight">FinChat<span className="text-whatsapp">.AI</span></span>
           </a>
           <button className="md:hidden text-slate-400 hover:text-white transition-colors" onClick={onCloseSidebar}>
             <i className="fa-solid fa-xmark text-xl"></i>
