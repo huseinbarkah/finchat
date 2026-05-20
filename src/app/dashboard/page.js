@@ -11,6 +11,7 @@ import SyncTab from "@/components/dashboard/SyncTab";
 import ReportTab from "@/components/dashboard/ReportTab";
 import WASimulator from "@/components/dashboard/WASimulator";
 import Toast from "@/components/dashboard/Toast";
+import AddWorkspaceModal from "@/components/dashboard/AddWorkspaceModal";
 
 const TAB_CONFIG = {
   "tab-ikhtisar": { title: "Ikhtisar Dashboard", sub: "Potret cepat arus kas & efisiensi kecerdasan buatan Anda bulan ini." },
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("tab-ikhtisar");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [isAddWorkspaceOpen, setIsAddWorkspaceOpen] = useState(false);
 
   useEffect(() => { setData(loadData()); }, []);
 
@@ -59,6 +61,7 @@ export default function DashboardPage() {
         onTabChange={(tab) => { setActiveTab(tab); setSidebarOpen(false); }}
         onWorkspaceChange={(id) => { data.activeWorkspaceId = id; updateData(data); addToast("Berpindah Workspace", `Membuka workspace ${data.workspaces[id].name}`, "info"); }}
         onCloseSidebar={() => setSidebarOpen(false)}
+        onAddWorkspaceClick={() => setIsAddWorkspaceOpen(true)}
       />
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
@@ -76,6 +79,17 @@ export default function DashboardPage() {
       </main>
 
       <WASimulator ws={ws} data={data} updateData={updateData} addToast={addToast} />
+
+      <AddWorkspaceModal
+        isOpen={isAddWorkspaceOpen}
+        onClose={() => setIsAddWorkspaceOpen(false)}
+        onSave={(slug, newWorkspace) => {
+          data.workspaces[slug] = newWorkspace;
+          data.activeWorkspaceId = slug;
+          updateData(data);
+          addToast("Workspace Dibuat", `Berhasil membuat & membuka workspace "${newWorkspace.name}"`, "success");
+        }}
+      />
     </div>
   );
 }

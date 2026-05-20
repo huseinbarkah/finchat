@@ -1,6 +1,6 @@
 "use client";
 
-export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onWorkspaceChange, onCloseSidebar }) {
+export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onWorkspaceChange, onCloseSidebar, onAddWorkspaceClick }) {
   const ws = data.workspaces[data.activeWorkspaceId];
   const tabs = [
     { id: "tab-ikhtisar", icon: "fa-chart-line", label: "Ikhtisar (Overview)" },
@@ -29,14 +29,30 @@ export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onW
           <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-1.5 px-2">Workspace</label>
           <div className="relative">
             <select value={data.activeWorkspaceId} onChange={(e) => onWorkspaceChange(e.target.value)} className="w-full bg-navy-950 border border-navy-800 rounded-xl px-3 py-2.5 text-xs font-semibold text-white appearance-none focus:outline-none focus:border-whatsapp focus:ring-1 focus:ring-whatsapp cursor-pointer">
-              <option value="bem-unpad">🎒 BEM Kema Unpad</option>
-              <option value="personal">👨‍💻 Keuangan Pribadi</option>
-              <option value="umkm">🛍️ Kedai Kopi Kita (UMKM)</option>
+              {Object.entries(data.workspaces).map(([id, wsItem]) => {
+                let defaultEmoji = "💼";
+                if (id === "bem-unpad") defaultEmoji = "🎒";
+                else if (id === "personal") defaultEmoji = "👨‍💻";
+                else if (id === "umkm") defaultEmoji = "🛍️";
+                const emoji = wsItem.emoji || defaultEmoji;
+                return (
+                  <option key={id} value={id}>
+                    {emoji} {wsItem.name}
+                  </option>
+                );
+              })}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[10px]">
               <i className="fa-solid fa-chevron-down"></i>
             </div>
           </div>
+          <button
+            onClick={onAddWorkspaceClick}
+            className="w-full mt-2.5 flex items-center justify-center gap-1.5 bg-navy-950/40 hover:bg-navy-950/85 border border-dashed border-navy-800/80 hover:border-whatsapp/40 text-[10px] font-bold text-slate-400 hover:text-white rounded-xl py-2 px-3 transition-all cursor-pointer"
+          >
+            <i className="fa-solid fa-plus text-[9px] text-whatsapp"></i>
+            Tambah Workspace
+          </button>
         </div>
 
         <nav className="px-3 py-4 space-y-1">
