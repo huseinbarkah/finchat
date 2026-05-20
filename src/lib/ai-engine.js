@@ -68,7 +68,10 @@ export async function parseWithGemini(text, customRules = []) {
     if (customRules.length > 0) {
       enhancedPrompt += "\n\nATURAN KUSTOM ORGANISASI:\n";
       customRules.forEach((r) => {
-        enhancedPrompt += `- Jika mengandung kata "${r.keyword}", klasifikasikan ke kategori "${r.category}"\n`;
+        let typeStr = "";
+        if (r.type === "income") typeStr = ' sebagai INCOME (pemasukan) dan';
+        else if (r.type === "expense") typeStr = ' sebagai EXPENSE (pengeluaran) dan';
+        enhancedPrompt += `- Jika mengandung kata "${r.keyword}", klasifikasikan${typeStr} ke kategori "${r.category}"\n`;
       });
     }
 
@@ -121,9 +124,13 @@ export function parseWithLocalNLP(text, customRules = [], categories = []) {
 
   // 1. Process custom AI rules
   let matchedCategory = null;
+  let matchedType = null;
   for (const rule of customRules) {
     if (cleanText.includes(rule.keyword.toLowerCase())) {
       matchedCategory = rule.category;
+      if (rule.type && rule.type !== "auto") {
+        matchedType = rule.type;
+      }
       break;
     }
   }
@@ -162,10 +169,14 @@ export function parseWithLocalNLP(text, customRules = [], categories = []) {
   const incomeKeywords = ["terima", "masuk", "donasi", "iuran", "gaji", "penjualan", "kas masuk", "dapat", "pemasukan"];
   const expenseKeywords = ["beli", "bayar", "keluar", "buat", "cetak", "fotokopi", "sewa", "ongkir", "kulakan", "tagihan"];
 
-  for (const kw of incomeKeywords) {
-    if (cleanText.includes(kw)) {
-      type = "income";
-      break;
+  if (matchedType) {
+    type = matchedType;
+  } else {
+    for (const kw of incomeKeywords) {
+      if (cleanText.includes(kw)) {
+        type = "income";
+        break;
+      }
     }
   }
 

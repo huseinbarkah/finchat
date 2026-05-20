@@ -6,15 +6,17 @@ import { formatRupiah } from "@/lib/utils";
 export default function BudgetTab({ ws, data, updateData, addToast }) {
   const [ruleKw, setRuleKw] = useState("");
   const [ruleCat, setRuleCat] = useState(ws.categories[0] || "");
+  const [ruleType, setRuleType] = useState("auto");
 
   const handleAddRule = (e) => {
     e.preventDefault();
     const kw = ruleKw.trim().toLowerCase();
     if (!kw) return;
     if (ws.aiRules.some((r) => r.keyword === kw)) { alert("Aturan tersebut sudah ada!"); return; }
-    ws.aiRules.push({ keyword: kw, category: ruleCat });
+    ws.aiRules.push({ keyword: kw, category: ruleCat, type: ruleType });
     updateData(data);
     setRuleKw("");
+    setRuleType("auto");
     addToast("Aturan AI Ditambahkan", `"${kw}" → "${ruleCat}"`, "success");
   };
 
@@ -66,10 +68,18 @@ export default function BudgetTab({ ws, data, updateData, addToast }) {
             <p className="text-xs text-slate-500">Petakan kosakata lokal / slang khusus ke kategori pembukuan.</p>
           </div>
           <form onSubmit={handleAddRule} className="space-y-4 pt-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-1.5">Kosa Kata (Keyword)</label>
                 <input value={ruleKw} onChange={(e) => setRuleKw(e.target.value)} required type="text" placeholder="Contoh: 'goceng'" className="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-white focus:outline-none focus:border-whatsapp" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5">Tipe Aliran</label>
+                <select value={ruleType} onChange={(e) => setRuleType(e.target.value)} className="w-full text-xs px-3 py-2.5 rounded-xl bg-navy-950 border border-navy-800 text-slate-300 focus:outline-none focus:border-whatsapp cursor-pointer">
+                  <option value="auto">Otomatis</option>
+                  <option value="expense">Pengeluaran (-)</option>
+                  <option value="income">Pemasukan (+)</option>
+                </select>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-1.5">Kategori Klasifikasi</label>
@@ -93,6 +103,11 @@ export default function BudgetTab({ ws, data, updateData, addToast }) {
                     <span className="font-mono text-emerald-400 font-bold">&quot;{rule.keyword}&quot;</span>
                     <span className="text-slate-500"> → Kategori </span>
                     <span className="font-bold text-white">{rule.category}</span>
+                    {rule.type && rule.type !== "auto" && (
+                      <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${rule.type === 'income' ? 'bg-emerald-900 text-emerald-300' : 'bg-red-900 text-red-300'}`}>
+                        {rule.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                      </span>
+                    )}
                   </div>
                   <button onClick={() => removeRule(idx)} className="text-slate-500 hover:text-red-400 transition-colors"><i className="fa-solid fa-circle-xmark"></i></button>
                 </div>
