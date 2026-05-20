@@ -1,6 +1,6 @@
 "use client";
 
-export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onWorkspaceChange, onCloseSidebar, onAddWorkspaceClick }) {
+export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onWorkspaceChange, onCloseSidebar, onManageWorkspacesClick }) {
   const ws = data.workspaces[data.activeWorkspaceId];
   const tabs = [
     { id: "tab-ikhtisar", icon: "fa-chart-line", label: "Ikhtisar (Overview)" },
@@ -47,11 +47,11 @@ export default function Sidebar({ data, activeTab, sidebarOpen, onTabChange, onW
             </div>
           </div>
           <button
-            onClick={onAddWorkspaceClick}
+            onClick={onManageWorkspacesClick}
             className="w-full mt-2.5 flex items-center justify-center gap-1.5 bg-navy-950/40 hover:bg-navy-950/85 border border-dashed border-navy-800/80 hover:border-whatsapp/40 text-[10px] font-bold text-slate-400 hover:text-white rounded-xl py-2 px-3 transition-all cursor-pointer"
           >
-            <i className="fa-solid fa-plus text-[9px] text-whatsapp"></i>
-            Tambah Workspace
+            <i className="fa-solid fa-sliders text-[9px] text-whatsapp"></i>
+            Kelola Workspace
           </button>
         </div>
 

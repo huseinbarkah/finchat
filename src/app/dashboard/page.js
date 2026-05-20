@@ -11,7 +11,7 @@ import SyncTab from "@/components/dashboard/SyncTab";
 import ReportTab from "@/components/dashboard/ReportTab";
 import WASimulator from "@/components/dashboard/WASimulator";
 import Toast from "@/components/dashboard/Toast";
-import AddWorkspaceModal from "@/components/dashboard/AddWorkspaceModal";
+import ManageWorkspacesModal from "@/components/dashboard/ManageWorkspacesModal";
 
 const TAB_CONFIG = {
   "tab-ikhtisar": { title: "Ikhtisar Dashboard", sub: "Potret cepat arus kas & efisiensi kecerdasan buatan Anda bulan ini." },
@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("tab-ikhtisar");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
-  const [isAddWorkspaceOpen, setIsAddWorkspaceOpen] = useState(false);
+  const [isManageWorkspacesOpen, setIsManageWorkspacesOpen] = useState(false);
 
   useEffect(() => { setData(loadData()); }, []);
 
@@ -61,7 +61,7 @@ export default function DashboardPage() {
         onTabChange={(tab) => { setActiveTab(tab); setSidebarOpen(false); }}
         onWorkspaceChange={(id) => { data.activeWorkspaceId = id; updateData(data); addToast("Berpindah Workspace", `Membuka workspace ${data.workspaces[id].name}`, "info"); }}
         onCloseSidebar={() => setSidebarOpen(false)}
-        onAddWorkspaceClick={() => setIsAddWorkspaceOpen(true)}
+        onManageWorkspacesClick={() => setIsManageWorkspacesOpen(true)}
       />
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
@@ -80,14 +80,30 @@ export default function DashboardPage() {
 
       <WASimulator ws={ws} data={data} updateData={updateData} addToast={addToast} />
 
-      <AddWorkspaceModal
-        isOpen={isAddWorkspaceOpen}
-        onClose={() => setIsAddWorkspaceOpen(false)}
+      <ManageWorkspacesModal
+        isOpen={isManageWorkspacesOpen}
+        onClose={() => setIsManageWorkspacesOpen(false)}
+        data={data}
         onSave={(slug, newWorkspace) => {
           data.workspaces[slug] = newWorkspace;
           data.activeWorkspaceId = slug;
           updateData(data);
           addToast("Workspace Dibuat", `Berhasil membuat & membuka workspace "${newWorkspace.name}"`, "success");
+        }}
+        onDelete={(id) => {
+          const keys = Object.keys(data.workspaces);
+          if (keys.length <= 1) return;
+          const wsName = data.workspaces[id].name;
+
+          // Switch active workspace if deleting currently active workspace
+          if (data.activeWorkspaceId === id) {
+            const nextActiveId = keys.find((key) => key !== id);
+            data.activeWorkspaceId = nextActiveId;
+          }
+
+          delete data.workspaces[id];
+          updateData(data);
+          addToast("Workspace Dihapus", `Workspace "${wsName}" telah berhasil dihapus`, "warning");
         }}
       />
     </div>
