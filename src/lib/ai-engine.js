@@ -142,19 +142,41 @@ export function parseWithLocalNLP(text, customRules = [], categories = []) {
   else if (cleanText.includes("cepek")) amount = 100000;
   else if (cleanText.includes("sejuta")) amount = 1000000;
   else {
-    const match = cleanText.match(/(\d+(?:[.,]\d+)?)\s*(k|rb|ribu|jt|juta)?/);
-    if (match) {
+    // Strategy A: Look for numbers with financial suffixes (k, rb, ribu, jt, juta)
+    const suffixRegex = /(\d+(?:[.,]\d+)?)\s*(k|rb|ribu|jt|juta)\b/g;
+    const suffixMatches = [...cleanText.matchAll(suffixRegex)];
+
+    if (suffixMatches.length > 0) {
+      const match = suffixMatches[0];
       let baseVal = parseFloat(match[1].replace(",", "."));
-      let suffix = (match[2] || "").toLowerCase();
+      let suffix = match[2].toLowerCase();
 
       if (suffix === "k" || suffix === "rb" || suffix === "ribu") {
         amount = baseVal * 1000;
       } else if (suffix === "jt" || suffix === "juta") {
         amount = baseVal * 1000000;
+      }
+    } else {
+      // Strategy B: Look for numbers with "rp" prefix
+      const rpRegex = /rp\.?\s*(\d+(?:[.,]\d+)*)/g;
+      const rpMatches = [...cleanText.matchAll(rpRegex)];
+
+      if (rpMatches.length > 0) {
+        const rawNumStr = rpMatches[0][1].replace(/[.,]/g, "");
+        amount = parseInt(rawNumStr) || 0;
       } else {
-        // Try to extract raw number (remove dots that are thousand separators)
-        const rawNum = cleanText.replace(/\./g, "").match(/\d+/);
-        amount = rawNum ? parseInt(rawNum[0]) : 0;
+        // Strategy C: Extract all raw numbers and pick the largest one (to avoid quantity numbers like "2" in "2liter")
+        const numberRegex = /\b\d+(?:[.,]\d+)*\b/g;
+        const numbers = (cleanText.match(numberRegex) || [])
+          .map(numStr => {
+            const cleanNum = numStr.replace(/[.,]/g, "");
+            return parseInt(cleanNum) || 0;
+          })
+          .filter(n => n > 0);
+
+        if (numbers.length > 0) {
+          amount = Math.max(...numbers);
+        }
       }
     }
   }
